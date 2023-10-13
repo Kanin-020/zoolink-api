@@ -87,6 +87,48 @@ router.get('/get-all', (req, res) => {
 
 });
 
+router.get('/get-clients', (req, res) => {
+
+    connection.query(`SELECT * FROM users WHERE rol = 'client'`, (error, results) => {
+        try {
+            if (error) {
+                res.status(400).json({ error: 'No se pudo obtener la lista de clientes' });
+            } else {
+                if (results) {
+                    res.json({ clients: results });
+                } else {
+                    res.status(400).json({ error: 'No hay clientes en la base de datos' });
+                }
+            }
+        } catch (error) {
+            res.status(500).json({ error: error });
+        }
+
+    });
+
+});
+
+router.get('/get-doctors', (req, res) => {
+
+    connection.query(`SELECT * FROM users WHERE rol = 'doctor'`, (error, results) => {
+        try {
+            if (error) {
+                res.status(400).json({ error: 'No se pudo obtener la lista de doctores' });
+            } else {
+                if (results) {
+                    res.json({ doctors: results });
+                } else {
+                    res.status(400).json({ error: 'No hay doctores en la base de datos' });
+                }
+            }
+        } catch (error) {
+            res.status(500).json({ error: error });
+        }
+
+    });
+
+});
+
 router.get('/get/:userId', (req, res) => {
 
     const userId = req.params.userId;

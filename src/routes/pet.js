@@ -4,9 +4,9 @@ const connection = require('../utils/databaseConnection');
 
 router.post('/add', (req, res) => {
 
-    const { idUser, name, sex, species, age, weight } = req.body;
+    const { idDoctor, idClient, name, sex, species, age, weight } = req.body;
 
-    connection.query('INSERT INTO pets SET ?', { idUser: idUser, name: name, sex: sex, species: species, age: age, weight: weight }, async (error, results) => {
+    connection.query('INSERT INTO pets SET ?', { idDoctor: idDoctor, idClient: idClient, name: name, sex: sex, species: species, age: age, weight: weight }, async (error, results) => {
         try {
             if (error) {
                 res.status(400).json({ error: 'Error a registrar la mascota' });
