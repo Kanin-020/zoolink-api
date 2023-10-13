@@ -73,7 +73,11 @@ router.get('/get-all', (req, res) => {
             if (error) {
                 res.status(400).json({ error: 'No se pudo obtener la lista de usuarios' });
             } else {
-                res.json(results);
+                if (results) {
+                    res.json({ users: results });
+                } else {
+                    res.status(400).json({ error: 'No hay usuarios en la base de datos' });
+                }
             }
 
         } catch (error) {
@@ -92,7 +96,11 @@ router.get('/get/:userId', (req, res) => {
             if (error) {
                 res.status(400).json({ error: 'No se pudo obtener el usuario' });
             } else {
-                res.json(results[0]);
+                if (results[0]) {
+                    res.json({ user: results[0] });
+                } else {
+                    res.status(400).json({ error: 'No se encontró el usuario solicitado' });
+                }
             }
         } catch (error) {
             res.status(500).json({ error: error });
@@ -113,9 +121,9 @@ router.put('/edit/:userId', (req, res) => {
 
         try {
             if (error) {
-                res.status(400).send({ error: 'No se pudo actualizar la información del usuarios' });
+                res.status(400).send({ error: 'No se pudo actualizar la información del usuario' });
             } else {
-                res.json({ response: 'Usuario actualizado' });
+                res.json({ response: `Usuario actualizado. ID: ${userId}` });
             }
 
         } catch (error) {
