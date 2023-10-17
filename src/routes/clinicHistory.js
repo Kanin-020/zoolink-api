@@ -4,31 +4,30 @@ const connection = require('../utils/databaseConnection');
 
 router.post('/add', (req, res) => {
 
-    const { idDoctor, idClient, idPet, date, state, reason } = req.body;
+    const { idDoctor, idClient, idPet, idExam, idRecipe } = req.body;
 
-    connection.query('INSERT INTO appointments SET ?', { idDoctor: idDoctor, idClient: idClient, idPet: idPet, date: date, state: state, reason: reason }, async (error, results) => {
+    connection.query('INSERT INTO clinic_history SET ?', { idDoctor: idDoctor, idClient: idClient, idPet: idPet, idExam: idExam, idRecipe: idRecipe }, async (error, results) => {
         try {
             if (error) {
                 res.status(400).json({ error: error });
             } else {
-                res.json({ response: `Registro de cita exitoso. ID: ${results.insertId}` });
+                res.json({ response: `Creación de historial exitosa. ID: ${results.insertId}` });
             }
         } catch (error) {
             res.status(500).json({ error: error });
         }
     });
-
 
 });
 
 router.get('/get-all', (req, res) => {
 
-    connection.query(`SELECT * FROM appointments`, (error, results) => {
+    connection.query(`SELECT * FROM clinic_history`, (error, results) => {
         try {
             if (error) {
                 res.status(400).json({ error: error });
             } else {
-                res.json({ appointments: results });
+                res.json({ clinic_history: results });
             }
         } catch (error) {
             res.status(500).json({ error: error });
@@ -37,19 +36,19 @@ router.get('/get-all', (req, res) => {
 
 });
 
-router.get('/get/:appointmentId', (req, res) => {
+router.get('/get/:clinicHistoryId', (req, res) => {
 
-    const appointmentId = req.params.appointmentId;
+    const clinicHistoryId = req.params.clinicHistoryId;
 
-    connection.query('SELECT * FROM appointments WHERE idAppointment = ?', [appointmentId], (error, results) => {
+    connection.query('SELECT * FROM clinic_history WHERE idClinicHistory = ?', [clinicHistoryId], (error, results) => {
         try {
             if (error) {
                 res.status(400).json({ error: error });
             } else {
                 if (results[0]) {
-                    res.json({ appointment: results[0] });
+                    res.json({ clinic_history: results[0] });
                 } else {
-                    res.status(400).json({ error: 'No se encontraron las citas solicitadas' });
+                    res.status(400).json({ error: 'No se encontró el historial solicitado' });
                 }
             }
         } catch (error) {
@@ -64,13 +63,14 @@ router.get('/get/client/:clientId', (req, res) => {
 
     const clientId = req.params.clientId;
 
-    connection.query('SELECT * FROM appointments WHERE idClient = ?', [clientId], async (error, results) => {
+    connection.query(`SELECT * FROM clinic_history WHERE idClient = ?`, [clientId], (error, results) => {
         try {
             if (error) {
                 res.status(400).json({ error: error });
             } else {
-                res.json({ appointments: results });
+                res.json({ clinic_history: results });
             }
+
         } catch (error) {
             res.status(500).json({ error: error });
         }
@@ -83,13 +83,14 @@ router.get('/get/doctor/:doctorId', (req, res) => {
 
     const doctorId = req.params.doctorId;
 
-    connection.query('SELECT * FROM appointments WHERE idDoctor = ?', [doctorId], async (error, results) => {
+    connection.query(`SELECT * FROM clinic_history WHERE idDoctor = ?`, [doctorId], (error, results) => {
         try {
             if (error) {
                 res.status(400).json({ error: error });
             } else {
-                res.json({ appointments: results });
+                res.json({ clinic_history: results });
             }
+
         } catch (error) {
             res.status(500).json({ error: error });
         }
@@ -102,17 +103,14 @@ router.get('/get/pet/:petId', (req, res) => {
 
     const petId = req.params.petId;
 
-    connection.query('SELECT * FROM appointments WHERE idPet = ?', [petId], async (error, results) => {
+    connection.query(`SELECT * FROM clinic_history WHERE idPet = ?`, [petId], (error, results) => {
         try {
             if (error) {
                 res.status(400).json({ error: error });
             } else {
-                if (results[0]) {
-                    res.json({ appointments: results });
-                } else {
-                    res.status(400).json({ error: 'No se encontraron las citas solicitadas' });
-                }
+                res.json({ clinic_history: results });
             }
+
         } catch (error) {
             res.status(500).json({ error: error });
         }
@@ -121,49 +119,45 @@ router.get('/get/pet/:petId', (req, res) => {
 
 });
 
-router.put('/edit/:appointmentId', (req, res) => {
+router.put('/edit/:clinicHistoryId', (req, res) => {
 
-    const appointmentId = req.params.appointmentId;
+    const clinicHistoryId = req.params.clinicHistoryId;
 
-    const { date, state, reason } = req.body;
+    const { idExam, idRecipe } = req.body;
 
-    const updatedInformation = { date, state, reason };
+    const updatedInformation = { idExam, idRecipe };
 
-    connection.query('UPDATE appointments SET ? WHERE idAppointment = ?', [updatedInformation, appointmentId], (error, results) => {
+    connection.query('UPDATE clinic_history SET ? WHERE idClinicHistory = ?', [updatedInformation, clinicHistoryId], (error, results) => {
         try {
             if (error) {
                 res.status(400).send({ error: error });
             } else {
-                res.json({ response: `Cita actualizada. ID: ${appointmentId}` });
+                res.json({ response: `Historial actualizado. ID: ${clinicHistoryId}` });
             }
-
         } catch (error) {
             res.status(500).json({ error: error });
         }
-
     });
 
 });
 
-router.delete('/delete/:appointmentId', (req, res) => {
+router.delete('/delete/:clinicHistoryId', (req, res) => {
 
-    const appointmentId = req.params.appointmentId;
+    const clinicHistoryId = req.params.clinicHistoryId;
 
-    connection.query('DELETE FROM appointments WHERE idAppointment = ?', [appointmentId], (error, results) => {
-
+    connection.query('DELETE FROM clinic_history WHERE idClinicHistory = ?', [clinicHistoryId], (error, results) => {
         try {
             if (error) {
                 res.status(400).json({ error: error });
             } else {
-                res.json({ response: 'Cita eliminada' });
+                res.json({ response: 'Historial eliminado' });
             }
-
         } catch (error) {
             res.status(500).json({ error: error });
         }
-
     });
 
 });
+
 
 module.exports = router;

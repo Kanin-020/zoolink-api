@@ -65,6 +65,46 @@ router.get('/get/:petId', (req, res) => {
 
 });
 
+router.get('/get/client/:clientId', (req, res) => {
+
+    const clientId = req.params.clientId;
+
+    connection.query(`SELECT * FROM pets WHERE idClient = ?`, [clientId], (error, results) => {
+        try {
+            if (error) {
+                res.status(400).json({ error: error });
+            } else {
+                res.json({ pets: results });
+            }
+
+        } catch (error) {
+            res.status(500).json({ error: error });
+        }
+
+    });
+
+});
+
+router.get('/get/doctor/:doctorId', (req, res) => {
+
+    const doctorId = req.params.doctorId;
+
+    connection.query(`SELECT * FROM pets WHERE idDoctor = ?`, [doctorId], (error, results) => {
+        try {
+            if (error) {
+                res.status(400).json({ error: error });
+            } else {
+                res.json({ pets: results });
+            }
+
+        } catch (error) {
+            res.status(500).json({ error: error });
+        }
+
+    });
+
+});
+
 router.put('/edit/:petId', (req, res) => {
 
     const petId = req.params.petId;
