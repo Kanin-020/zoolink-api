@@ -9,7 +9,7 @@ router.post('/add', (req, res) => {
     connection.query('INSERT INTO pets SET ?', { idDoctor: idDoctor, idClient: idClient, name: name, sex: sex, species: species, age: age, weight: weight }, async (error, results) => {
         try {
             if (error) {
-                res.status(400).json({ error: 'Error a registrar la mascota' });
+                res.status(400).json({ error: error });
             } else {
                 res.json({ response: `Registro de mascota exitoso. ID: ${results.insertId}` });
             }
@@ -28,13 +28,9 @@ router.get('/get-all', (req, res) => {
     connection.query(`SELECT * FROM pets`, (error, results) => {
         try {
             if (error) {
-                res.status(400).json({ error: 'No se pudo obtener la lista de mascotas' });
+                res.status(400).json({ error: error });
             } else {
-                if (results) {
-                    res.json({ pets: results });
-                } else {
-                    res.status(400).json({ error: 'No hay mascotas en la base de datos' });
-                }
+                res.json({ pets: results });
             }
 
         } catch (error) {
@@ -52,7 +48,7 @@ router.get('/get/:petId', (req, res) => {
     connection.query('SELECT * FROM pets WHERE idPet = ?', [petId], (error, results) => {
         try {
             if (error) {
-                res.status(400).json({ error: 'No se pudo obtener la mascota solicitada' });
+                res.status(400).json({ error: error });
             } else {
                 if (results[0]) {
                     res.json({ pet: results[0] });
@@ -80,7 +76,7 @@ router.put('/edit/:petId', (req, res) => {
     connection.query('UPDATE pets SET ? WHERE idPet = ?', [updatedInformation, petId], (error, results) => {
         try {
             if (error) {
-                res.status(400).send({ error: 'No se pudo actualizar la información de la mascota' });
+                res.status(400).send({ error: error });
             } else {
                 res.json({ response: `Mascota actualizada. ID: ${petId}` });
             }
@@ -98,7 +94,7 @@ router.delete('/delete/:petId', (req, res) => {
     connection.query('DELETE FROM pets WHERE idPet = ?', [petId], (error, results) => {
         try {
             if (error) {
-                res.status(400).json({ error: 'No se pudo eliminar la mascota' });
+                res.status(400).json({ error: error });
             } else {
                 res.json({ response: 'Mascota eliminada' });
             }

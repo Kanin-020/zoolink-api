@@ -15,7 +15,7 @@ router.post('/register', (req, res) => {
     connection.query('INSERT INTO users SET ?', { username: username, email: email, password: password, rol: rol, birthdayDate: birthdayDate, registerDate: registerDate, lastLoginDate: lastLoginDate }, async (error, results) => {
         try {
             if (error) {
-                res.status(400).json({ error: 'Error al registrar el usuario' });
+                res.status(400).json({ error: error });
             } else {
                 res.json({ response: `Registro de usuario exitoso. ID: ${results.insertId}` });
             }
@@ -40,9 +40,7 @@ router.post('/login', (req, res) => {
     connection.query(loginQuery, (error, results) => {
         try {
             if (error) {
-
-                res.status(400).json({ error: 'Error al iniciar sesión' });
-
+                res.status(400).json({ error: error });
             } else {
 
                 const user = results[0];
@@ -71,13 +69,9 @@ router.get('/get-all', (req, res) => {
     connection.query(`SELECT * FROM users`, (error, results) => {
         try {
             if (error) {
-                res.status(400).json({ error: 'No se pudo obtener la lista de usuarios' });
+                res.status(400).json({ error: error });
             } else {
-                if (results) {
-                    res.json({ users: results });
-                } else {
-                    res.status(400).json({ error: 'No hay usuarios en la base de datos' });
-                }
+                res.json({ users: results });
             }
 
         } catch (error) {
@@ -92,7 +86,7 @@ router.get('/get-clients', (req, res) => {
     connection.query(`SELECT * FROM users WHERE rol = 'client'`, (error, results) => {
         try {
             if (error) {
-                res.status(400).json({ error: 'No se pudo obtener la lista de clientes' });
+                res.status(400).json({ error: error });
             } else {
                 if (results) {
                     res.json({ clients: results });
@@ -113,7 +107,7 @@ router.get('/get-doctors', (req, res) => {
     connection.query(`SELECT * FROM users WHERE rol = 'doctor'`, (error, results) => {
         try {
             if (error) {
-                res.status(400).json({ error: 'No se pudo obtener la lista de doctores' });
+                res.status(400).json({ error: error });
             } else {
                 if (results) {
                     res.json({ doctors: results });
@@ -136,7 +130,7 @@ router.get('/get/:userId', (req, res) => {
     connection.query('SELECT * FROM users WHERE idUser = ?', [userId], (error, results) => {
         try {
             if (error) {
-                res.status(400).json({ error: 'No se pudo obtener el usuario' });
+                res.status(400).json({ error: error });
             } else {
                 if (results[0]) {
                     res.json({ user: results[0] });
@@ -163,7 +157,7 @@ router.put('/edit/:userId', (req, res) => {
 
         try {
             if (error) {
-                res.status(400).send({ error: 'No se pudo actualizar la información del usuario' });
+                res.status(400).send({ error: error });
             } else {
                 res.json({ response: `Usuario actualizado. ID: ${userId}` });
             }
@@ -185,7 +179,7 @@ router.delete('/delete/:userId', (req, res) => {
 
         try {
             if (error) {
-                res.status(400).json({ error: 'No se pudo eliminar el usuario' });
+                res.status(400).json({ error: error });
             } else {
                 res.json({ response: 'Usuario eliminado' });
             }
