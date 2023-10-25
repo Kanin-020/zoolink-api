@@ -62,7 +62,7 @@ router.get('/get/:recipeId', (req, res) => {
 
 router.get('/get/clinicHistory/:clinicHistoryId', (req, res) => {
 
-    const clinicHistoryId = req.params.clinicHistorytId;
+    const clinicHistoryId = req.params.clinicHistoryId;
 
     connection.query('SELECT * FROM recipes WHERE idClinicHistory = ?', [clinicHistoryId], async (error, results) => {
         try {
