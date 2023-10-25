@@ -4,9 +4,9 @@ const connection = require('../utils/databaseConnection');
 
 router.post('/add', (req, res) => {
 
-    const { idDoctor, idClient, idPet, idExam, idRecipe } = req.body;
+    const { idDoctor, idClient, idPet } = req.body;
 
-    connection.query('INSERT INTO clinic_history SET ?', { idDoctor: idDoctor, idClient: idClient, idPet: idPet, idExam: idExam, idRecipe: idRecipe }, async (error, results) => {
+    connection.query('INSERT INTO clinic_history SET ?', { idDoctor: idDoctor, idClient: idClient, idPet: idPet }, async (error, results) => {
         try {
             if (error) {
                 res.status(400).json({ error: error });
@@ -115,28 +115,6 @@ router.get('/get/pet/:petId', (req, res) => {
             res.status(500).json({ error: error });
         }
 
-    });
-
-});
-
-router.put('/edit/:clinicHistoryId', (req, res) => {
-
-    const clinicHistoryId = req.params.clinicHistoryId;
-
-    const { idExam, idRecipe } = req.body;
-
-    const updatedInformation = { idExam, idRecipe };
-
-    connection.query('UPDATE clinic_history SET ? WHERE idClinicHistory = ?', [updatedInformation, clinicHistoryId], (error, results) => {
-        try {
-            if (error) {
-                res.status(400).send({ error: error });
-            } else {
-                res.json({ response: `Historial actualizado. ID: ${clinicHistoryId}` });
-            }
-        } catch (error) {
-            res.status(500).json({ error: error });
-        }
     });
 
 });
