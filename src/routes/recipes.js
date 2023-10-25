@@ -60,7 +60,7 @@ router.get('/get/:recipeId', (req, res) => {
 
 });
 
-router.get('/get/clinicHistory/:clinicHistorytId', (req, res) => {
+router.get('/get/clinicHistory/:clinicHistoryId', (req, res) => {
 
     const clinicHistoryId = req.params.clinicHistorytId;
 
