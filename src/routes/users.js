@@ -54,7 +54,7 @@ router.post('/login', (req, res) => {
                         });
                     });
 
-                }else{
+                } else {
                     res.json({
                         ok: false
                     })
