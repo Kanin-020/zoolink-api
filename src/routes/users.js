@@ -48,11 +48,17 @@ router.post('/login', (req, res) => {
                 if (user.password == password) {
 
                     connection.query(dateQuery, () => {
-                        res.json({rol: user.rol});
+                        res.json({
+                            rol: user.rol,
+                            ok: true
+                        });
                     });
 
+                }else{
+                    res.json({
+                        ok: false
+                    })
                 }
-
             }
 
         } catch (error) {
