@@ -48,7 +48,7 @@ router.post('/login', (req, res) => {
                 if (user.password == password) {
 
                     connection.query(dateQuery, () => {
-                        res.json({ response: 'Inicio de sesión válido' });
+                        res.json({rol: user.rol});
                     });
 
                 }

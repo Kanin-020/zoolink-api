@@ -14,8 +14,8 @@ const app = express();
 const PORT = 3000;
 
 //Config
-// app.use(cors({ cors: "127.0.0.1:4200" }));
-app.use(cors({ origin: "127.0.0.1" }));
+app.use(cors({ cors: "127.0.0.1:5173" }));
+//app.use(cors({ origin: "127.0.0.1" }));
 app.use(express.urlencoded({ extended: false }));
 app.use(express.json());
 
