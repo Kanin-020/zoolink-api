@@ -85,7 +85,7 @@ router.put('/edit/:recipeId', (req, res) => {
 
     const { medicine, dose } = req.body;
 
-    const updatedInformation = { type, result };
+    const updatedInformation = { medicine, dose };
 
     connection.query('UPDATE recipes SET ? WHERE idRecipes = ?', [updatedInformation, recipeId], (error, results) => {
         try {
