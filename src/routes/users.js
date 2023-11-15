@@ -49,6 +49,7 @@ router.post('/login', (req, res) => {
 
                     connection.query(dateQuery, () => {
                         res.json({
+                            idUser: user.idUser,
                             rol: user.rol,
                             ok: true
                         });
