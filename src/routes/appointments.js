@@ -3,22 +3,27 @@ const router = express.Router();
 const connection = require('../utils/databaseConnection');
 
 router.post('/add', (req, res) => {
-
     const { idDoctor, idClient, idPet, date, state, reason } = req.body;
 
-    connection.query('INSERT INTO appointments SET ?', { idDoctor: idDoctor, idClient: idClient, idPet: idPet, date: date, state: state, reason: reason }, async (error, results) => {
+    connection.query('SELECT * FROM appointments WHERE date = ? AND idPet = ?', [date, idPet], (error, results) => {
         try {
             if (error) {
                 res.status(400).json({ error: error });
+            } else if (results.length > 0) {
+                res.status(409).json({ error: 'Ya existe una cita para esta mascota en la misma fecha' });
             } else {
-                res.json({ response: `Registro de cita exitoso. ID: ${results.insertId}` });
+                connection.query('INSERT INTO appointments SET ?', { idDoctor, idClient, idPet, date, state, reason }, (error, results) => {
+                    if (error) {
+                        res.status(400).json({ error: error });
+                    } else {
+                        res.json({ response: `Registro de cita exitoso. ID: ${results.insertId}` });
+                    }
+                });
             }
         } catch (error) {
             res.status(500).json({ error: error });
         }
     });
-
-
 });
 
 router.get('/get-all', (req, res) => {
@@ -49,7 +54,7 @@ router.get('/get/:appointmentId', (req, res) => {
                 if (results[0]) {
                     res.json({ appointment: results[0] });
                 } else {
-                    res.status(400).json({ error: 'No se encontraron las citas solicitadas' });
+                    res.status(404).json({ error: 'Cita no encontrada' });
                 }
             }
         } catch (error) {
@@ -107,11 +112,7 @@ router.get('/get/pet/:petId', (req, res) => {
             if (error) {
                 res.status(400).json({ error: error });
             } else {
-                if (results[0]) {
-                    res.json({ appointments: results });
-                } else {
-                    res.status(400).json({ error: 'No se encontraron las citas solicitadas' });
-                }
+                res.json({ appointments: results });
             }
         } catch (error) {
             res.status(500).json({ error: error });
@@ -122,48 +123,54 @@ router.get('/get/pet/:petId', (req, res) => {
 });
 
 router.put('/edit/:appointmentId', (req, res) => {
-
     const appointmentId = req.params.appointmentId;
-
     const { date, state, reason } = req.body;
-
     const updatedInformation = { date, state, reason };
 
-    connection.query('UPDATE appointments SET ? WHERE idAppointment = ?', [updatedInformation, appointmentId], (error, results) => {
-        try {
-            if (error) {
-                res.status(400).send({ error: error });
-            } else {
-                res.json({ response: `Cita actualizada. ID: ${appointmentId}` });
-            }
-
-        } catch (error) {
-            res.status(500).json({ error: error });
-        }
-
-    });
-
-});
-
-router.delete('/delete/:appointmentId', (req, res) => {
-
-    const appointmentId = req.params.appointmentId;
-
-    connection.query('DELETE FROM appointments WHERE idAppointment = ?', [appointmentId], (error, results) => {
-
+    connection.query('SELECT * FROM appointments WHERE idAppointment = ?', [appointmentId], (error, results) => {
         try {
             if (error) {
                 res.status(400).json({ error: error });
+            } else if (results.length === 0) {
+                res.status(404).json({ error: 'Cita no encontrada' });
             } else {
-                res.json({ response: 'Cita eliminada' });
+                // La cita existe, realizar la actualización
+                connection.query('UPDATE appointments SET ? WHERE idAppointment = ?', [updatedInformation, appointmentId], (error, results) => {
+                    if (error) {
+                        res.status(400).json({ error: error });
+                    } else {
+                        res.json({ response: `Cita actualizada. ID: ${appointmentId}` });
+                    }
+                });
             }
-
         } catch (error) {
             res.status(500).json({ error: error });
         }
-
     });
+});
 
+router.delete('/delete/:appointmentId', (req, res) => {
+    const appointmentId = req.params.appointmentId;
+
+    connection.query('SELECT * FROM appointments WHERE idAppointment = ?', [appointmentId], (error, results) => {
+        try {
+            if (error) {
+                res.status(400).json({ error: error });
+            } else if (results.length === 0) {
+                res.status(404).json({ error: 'Cita no encontrada' });
+            } else {
+                connection.query('DELETE FROM appointments WHERE idAppointment = ?', [appointmentId], (error, results) => {
+                    if (error) {
+                        res.status(400).json({ error: error });
+                    } else {
+                        res.json({ response: 'Cita eliminada' });
+                    }
+                });
+            }
+        } catch (error) {
+            res.status(500).json({ error: error });
+        }
+    });
 });
 
 module.exports = router;

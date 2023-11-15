@@ -3,24 +3,27 @@ const router = express.Router();
 const connection = require('../utils/databaseConnection');
 
 router.post('/add', (req, res) => {
-
     const { idReceiver, message } = req.body;
 
-    connection.query('INSERT INTO reminders SET ?', { idReceiver: idReceiver, message: message }, async (error, results) => {
+    connection.query('SELECT * FROM reminders WHERE idReceiver = ? AND message = ?', [idReceiver, message], (error, results) => {
         try {
             if (error) {
                 res.status(400).json({ error: error });
+            } else if (results.length > 0) {
+                res.status(409).json({ error: 'Ya existe un recordatorio con el mismo receptor y mensaje' });
             } else {
-                res.json({ response: `Registro de recordatorio exitoso. ID: ${results.insertId}` });
+                connection.query('INSERT INTO reminders SET ?', { idReceiver, message }, (error, results) => {
+                    if (error) {
+                        res.status(400).json({ error: error });
+                    } else {
+                        res.json({ response: `Registro de recordatorio exitoso. ID: ${results.insertId}` });
+                    }
+                });
             }
-
         } catch (error) {
             res.status(500).json({ error: error });
         }
-
-
     });
-
 });
 
 router.get('/get-all', (req, res) => {
@@ -53,7 +56,7 @@ router.get('/get/:reminderId', (req, res) => {
                 if (results[0]) {
                     res.json({ reminder: results[0] });
                 } else {
-                    res.status(400).json({ error: 'No se encontró el recordatorio solicitado' });
+                    res.status(404).json({ error: 'No se encontró el recordatorio solicitado' });
                 }
             }
 
@@ -87,43 +90,53 @@ router.get('/get/receiver/:receiverId', (req, res) => {
 
 
 router.put('/edit/:reminderId', (req, res) => {
-
     const reminderId = req.params.reminderId;
-
     const { message } = req.body;
-
     const updatedInformation = { message };
 
-    connection.query('UPDATE reminders SET ? WHERE idReminder = ?', [updatedInformation, reminderId], (error, results) => {
-        try {
-            if (error) {
-                res.status(400).send({ error: error });
-            } else {
-                res.json({ response: `Recordatorio actualizado. ID: ${reminderId}` });
-            }
-        } catch (error) {
-            res.status(500).json({ error: error });
-        }
-    });
-
-});
-
-router.delete('/delete/:reminderId', (req, res) => {
-
-    const reminderId = req.params.reminderId;
-
-    connection.query('DELETE FROM reminders WHERE idReminder = ?', [reminderId], (error, results) => {
+    connection.query('SELECT * FROM reminders WHERE idReminder = ?', [reminderId], (error, results) => {
         try {
             if (error) {
                 res.status(400).json({ error: error });
+            } else if (results.length === 0) {
+                res.status(404).json({ error: 'Recordatorio no encontrado' });
             } else {
-                res.json({ response: 'Recordatorio eliminado' });
+                connection.query('UPDATE reminders SET ? WHERE idReminder = ?', [updatedInformation, reminderId], (error, results) => {
+                    if (error) {
+                        res.status(400).json({ error: error });
+                    } else {
+                        res.json({ response: `Recordatorio actualizado. ID: ${reminderId}` });
+                    }
+                });
             }
         } catch (error) {
             res.status(500).json({ error: error });
         }
     });
+});
 
+router.delete('/delete/:reminderId', (req, res) => {
+    const reminderId = req.params.reminderId;
+
+    connection.query('SELECT * FROM reminders WHERE idReminder = ?', [reminderId], (error, results) => {
+        try {
+            if (error) {
+                res.status(400).json({ error: error });
+            } else if (results.length === 0) {
+                res.status(404).json({ error: 'Recordatorio no encontrado' });
+            } else {
+                connection.query('DELETE FROM reminders WHERE idReminder = ?', [reminderId], (error, results) => {
+                    if (error) {
+                        res.status(400).json({ error: error });
+                    } else {
+                        res.json({ response: 'Recordatorio eliminado' });
+                    }
+                });
+            }
+        } catch (error) {
+            res.status(500).json({ error: error });
+        }
+    });
 });
 
 module.exports = router;

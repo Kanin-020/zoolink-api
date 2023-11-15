@@ -12,20 +12,26 @@ router.post('/register', (req, res) => {
 
     const lastLoginDate = 'none';
 
-    connection.query('INSERT INTO users SET ?', { username: username, email: email, password: password, rol: rol, birthdayDate: birthdayDate, registerDate: registerDate, lastLoginDate: lastLoginDate }, async (error, results) => {
+    connection.query('SELECT * FROM users WHERE username = ? OR email = ?', [username, email], (error, results) => {
         try {
             if (error) {
                 res.status(400).json({ error: error });
+            } else if (results.length > 0) {
+                res.status(409).json({ error: 'El usuario ya existe en la base de datos' });
             } else {
-                res.json({ response: `Registro de usuario exitoso. ID: ${results.insertId}` });
+                // El usuario no existe, realizar la inserción
+                connection.query('INSERT INTO users SET ?', { username, email, password, rol, birthdayDate, registerDate, lastLoginDate }, (error, results) => {
+                    if (error) {
+                        res.status(400).json({ error: error });
+                    } else {
+                        res.json({ response: `Registro de usuario exitoso. ID: ${results.insertId}` });
+                    }
+                });
             }
-
         } catch (error) {
             res.status(500).json({ error: error });
         }
-
     });
-
 });
 
 router.post('/login', (req, res) => {
@@ -142,7 +148,7 @@ router.get('/get/:userId', (req, res) => {
                 if (results[0]) {
                     res.json({ user: results[0] });
                 } else {
-                    res.status(400).json({ error: 'No se encontró el usuario solicitado' });
+                    res.status(404).json({ error: 'Usuario no encontrado' });
                 }
             }
         } catch (error) {
@@ -153,50 +159,59 @@ router.get('/get/:userId', (req, res) => {
 });
 
 router.put('/edit/:userId', (req, res) => {
-
     const userId = req.params.userId;
-
     const { username, email, password, rol, birthdayDate } = req.body;
-
     const updatedInformation = { username, email, password, rol, birthdayDate };
 
-    connection.query('UPDATE users SET ? WHERE idUser = ?', [updatedInformation, userId], (error, results) => {
-
-        try {
-            if (error) {
-                res.status(400).send({ error: error });
-            } else {
-                res.json({ response: `Usuario actualizado. ID: ${userId}` });
-            }
-
-        } catch (error) {
-            res.status(500).json({ error: error });
-        }
-
-    });
-
-
-});
-
-router.delete('/delete/:userId', (req, res) => {
-
-    const userId = req.params.userId;
-
-    connection.query('DELETE FROM users WHERE idUser = ?', [userId], (error, results) => {
-
+    connection.query('SELECT * FROM users WHERE idUser = ?', [userId], (error, results) => {
         try {
             if (error) {
                 res.status(400).json({ error: error });
-            } else {
-                res.json({ response: 'Usuario eliminado' });
-            }
+            } else if (results.length === 0) {
 
+                res.status(404).json({ error: 'Usuario no encontrado' });
+
+            } else {
+                connection.query('UPDATE users SET ? WHERE idUser = ?', [updatedInformation, userId], (error, results) => {
+                    if (error) {
+                        res.status(400).json({ error: error });
+                    } else {
+                        res.json({ response: `Usuario actualizado. ID: ${userId}` });
+                    }
+                });
+            }
         } catch (error) {
             res.status(500).json({ error: error });
         }
-
     });
+});
 
+router.delete('/delete/:userId', (req, res) => {
+    const userId = req.params.userId;
+
+    // Verificar si el usuario con el ID proporcionado existe en la base de datos
+    connection.query('SELECT * FROM users WHERE idUser = ?', [userId], (error, results) => {
+        try {
+            if (error) {
+                res.status(400).json({ error: error });
+            } else if (results.length === 0) {
+
+                res.status(404).json({ error: 'Usuario no encontrado' });
+
+            } else {
+
+                connection.query('DELETE FROM users WHERE idUser = ?', [userId], (error, results) => {
+                    if (error) {
+                        res.status(400).json({ error: error });
+                    } else {
+                        res.json({ response: 'Usuario eliminado' });
+                    }
+                });
+            }
+        } catch (error) {
+            res.status(500).json({ error: error });
+        }
+    });
 });
 
 

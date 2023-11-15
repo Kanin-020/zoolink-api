@@ -3,21 +3,27 @@ const router = express.Router();
 const connection = require('../utils/databaseConnection');
 
 router.post('/add', (req, res) => {
-
     const { idDoctor, idClient, idPet } = req.body;
 
-    connection.query('INSERT INTO clinic_history SET ?', { idDoctor: idDoctor, idClient: idClient, idPet: idPet }, async (error, results) => {
+    connection.query('SELECT * FROM clinic_history WHERE idPet = ?', [idPet], (error, results) => {
         try {
             if (error) {
                 res.status(400).json({ error: error });
+            } else if (results.length > 0) {
+                res.status(409).json({ error: 'Ya existe una Historial clínico para esta mascota' });
             } else {
-                res.json({ response: `Creación de historial exitosa. ID: ${results.insertId}` });
+                connection.query('INSERT INTO clinic_history SET ?', { idDoctor, idClient, idPet }, (error, results) => {
+                    if (error) {
+                        res.status(400).json({ error: error });
+                    } else {
+                        res.json({ response: `Creación de historial exitosa. ID: ${results.insertId}` });
+                    }
+                });
             }
         } catch (error) {
             res.status(500).json({ error: error });
         }
     });
-
 });
 
 router.get('/get-all', (req, res) => {
@@ -48,7 +54,7 @@ router.get('/get/:clinicHistoryId', (req, res) => {
                 if (results[0]) {
                     res.json({ clinic_history: results[0] });
                 } else {
-                    res.status(400).json({ error: 'No se encontró el historial solicitado' });
+                    res.status(404).json({ error: 'Historial clínico no encontrada' });
                 }
             }
         } catch (error) {
@@ -120,21 +126,27 @@ router.get('/get/pet/:petId', (req, res) => {
 });
 
 router.delete('/delete/:clinicHistoryId', (req, res) => {
-
     const clinicHistoryId = req.params.clinicHistoryId;
 
-    connection.query('DELETE FROM clinic_history WHERE idClinicHistory = ?', [clinicHistoryId], (error, results) => {
+    connection.query('SELECT * FROM clinic_history WHERE idClinicHistory = ?', [clinicHistoryId], (error, results) => {
         try {
             if (error) {
                 res.status(400).json({ error: error });
+            } else if (results.length === 0) {
+                res.status(404).json({ error: 'Historial clínico no encontrada' });
             } else {
-                res.json({ response: 'Historial eliminado' });
+                connection.query('DELETE FROM clinic_history WHERE idClinicHistory = ?', [clinicHistoryId], (error, results) => {
+                    if (error) {
+                        res.status(400).json({ error: error });
+                    } else {
+                        res.json({ response: 'Historial eliminado' });
+                    }
+                });
             }
         } catch (error) {
             res.status(500).json({ error: error });
         }
     });
-
 });
 
 
