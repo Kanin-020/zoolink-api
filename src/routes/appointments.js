@@ -42,11 +42,43 @@ router.get('/get-all', (req, res) => {
 
 });
 
+router.get('/get-earring', (req, res) => {
+
+    connection.query(`SELECT * FROM appointments AS a JOIN pets AS p ON a.idPet = p.idPet JOIN users AS u ON a.idClient = u.idUser WHERE a.state = "earring" OR a.state = "accepted"`, (error, results) => {
+        try {
+            if (error) {
+                res.status(400).json({ error: error });
+            } else {
+                res.json({ appointments: results });
+            }
+        } catch (error) {
+            res.status(500).json({ error: error });
+        }
+    });
+
+});
+
+router.get('/get-finished', (req, res) => {
+
+    connection.query(`SELECT * FROM appointments AS a JOIN pets AS p ON a.idPet = p.idPet JOIN users AS u ON a.idClient = u.idUser WHERE a.state = "finished"`, (error, results) => {
+        try {
+            if (error) {
+                res.status(400).json({ error: error });
+            } else {
+                res.json({ appointments: results });
+            }
+        } catch (error) {
+            res.status(500).json({ error: error });
+        }
+    });
+
+});
+
 router.get('/get/:appointmentId', (req, res) => {
 
     const appointmentId = req.params.appointmentId;
 
-    connection.query('SELECT * FROM appointments WHERE idAppointment = ?', [appointmentId], (error, results) => {
+    connection.query('SELECT * FROM appointments AS a JOIN pets AS p ON a.idPet = p.idPet JOIN users AS u ON a.idClient = u.idUser WHERE a. idAppointment = ?', [appointmentId], (error, results) => {
         try {
             if (error) {
                 res.status(400).json({ error: error });
@@ -69,8 +101,9 @@ router.get('/get/client/:clientId', (req, res) => {
 
     const clientId = req.params.clientId;
 
-    connection.query('SELECT * FROM appointments WHERE idClient = ?', [clientId], async (error, results) => {
+    connection.query('SELECT * FROM appointments AS a JOIN pets AS p ON a.idPet = p.idPet WHERE a.idClient = ?', [clientId], async (error, results) => {
         try {
+            console.log(results)
             if (error) {
                 res.status(400).json({ error: error });
             } else {
@@ -124,8 +157,8 @@ router.get('/get/pet/:petId', (req, res) => {
 
 router.put('/edit/:appointmentId', (req, res) => {
     const appointmentId = req.params.appointmentId;
-    const { date, state, reason } = req.body;
-    const updatedInformation = { date, state, reason };
+    const { date, state, reason, idDoctor } = req.body;
+    const updatedInformation = { date, state, reason, idDoctor };
 
     connection.query('SELECT * FROM appointments WHERE idAppointment = ?', [appointmentId], (error, results) => {
         try {

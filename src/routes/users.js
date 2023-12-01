@@ -160,8 +160,8 @@ router.get('/get/:userId', (req, res) => {
 
 router.put('/edit/:userId', (req, res) => {
     const userId = req.params.userId;
-    const { username, email, password, rol, birthdayDate } = req.body;
-    const updatedInformation = { username, email, password, rol, birthdayDate };
+    const { username, email, birthdayDate } = req.body;
+    const updatedInformation = { username, email, birthdayDate };
 
     connection.query('SELECT * FROM users WHERE idUser = ?', [userId], (error, results) => {
         try {
